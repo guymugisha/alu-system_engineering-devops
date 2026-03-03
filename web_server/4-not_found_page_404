@@ -6,13 +6,25 @@ sudo apt-get -y install nginx
 sudo ufw allow 'Nginx HTTP'
 echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
 
-# Add redirect rule for /redirect_me
-sudo sed -i '/server_name _;/a \\tlocation /redirect_me {\n\t\treturn 301 https://www.wilsonn.vercel.app;\n\t}' /etc/nginx/sites-enabled/default
-
 # Create custom 404 page
 echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html > /dev/null
 
-# Add custom 404 error page directive
-sudo sed -i '/server_name _;/a \\terror_page 404 /404.html;' /etc/nginx/sites-enabled/default
+# Write nginx default config with custom 404 error page and redirect
+cat << 'EOF' | sudo tee /etc/nginx/sites-available/default > /dev/null
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+	root /var/www/html;
+	index index.html index.htm index.nginx-debian.html;
+	server_name _;
+	error_page 404 /404.html;
+	location /redirect_me {
+		return 301 https://www.wilsonn.vercel.app;
+	}
+	location / {
+		try_files $uri $uri/ =404;
+	}
+}
+EOF
 
 sudo service nginx restart

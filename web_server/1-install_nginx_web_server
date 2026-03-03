@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Installs and configures Nginx on a fresh Ubuntu server
+
+apt-get update -y
+apt-get install nginx -y
+
+echo "Holberton School for the win!" > /var/www/html/index.html
+service nginx start

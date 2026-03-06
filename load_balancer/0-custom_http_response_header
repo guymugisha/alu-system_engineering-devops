@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
-# Configures Nginx with custom HTTP response header X-Served-By
+# Configures a new Ubuntu machine with X-Served-By header and standard content
+
 apt-get update -y
-apt-get install nginx -y
-mkdir -p /var/www/html
-echo "Holberton School for the win!" | tee /var/www/html/index.html > /dev/null
-printf "Ceci n'est pas une page\n" | tee /var/www/html/404.html > /dev/null
-HOSTNAME=$(hostname)
-sed -i 's#server_name _;#server_name _;\n\tadd_header X-Served-By '"$HOSTNAME"';#' /etc/nginx/sites-available/default
+apt-get install -y nginx
+
+# Set custom index content (Required for previous web server tasks)
+echo "Holberton School" | tee /var/www/html/index.html > /dev/null
+
+# Set custom 404 page content
+echo "Ceci n'est pas une page" | tee /var/www/html/404.html > /dev/null
+
+# Add the X-Served-By header to the default site configuration
+# We use the Nginx variable $(hostname) to ensure the correct value is always returned
+sed -i "/server_name _;/a \	add_header X-Served-By \"$(hostname)\";" /etc/nginx/sites-available/default
+
+# Restart Nginx to apply changes
 service nginx restart

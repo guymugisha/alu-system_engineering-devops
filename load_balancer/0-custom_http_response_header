@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
-# Configures a new Ubuntu machine with X-Served-By header and standard content
+# Configures Nginx with a custom HTTP header X-Served-By
+# This script ensures the header is added only once and restores required content
 
 apt-get update -y
 apt-get install -y nginx
 
-# Set custom index content (Required for previous web server tasks)
+# Set custom index content (Required for ALX/ALU tasks)
 echo "Holberton School" | tee /var/www/html/index.html > /dev/null
 
-# Set custom 404 page content
-echo "Ceci n'est pas une page" | tee /var/www/html/404.html > /dev/null
+# Clean up any existing X-Served-By headers (Prevents "Got 2" error)
+sed -i '/X-Served-By/d' /etc/nginx/nginx.conf /etc/nginx/sites-available/default
 
-# Add the X-Served-By header to the default site configuration
-# We use the Nginx variable $(hostname) to ensure the correct value is always returned
-sed -i "/server_name _;/a \	add_header X-Served-By \"$(hostname)\";" /etc/nginx/sites-available/default
+# Add the header to the default site config inside the server block
+# Using $hostname (nginx variable) is the most reliable way
+sed -i "/server_name _;/a \	add_header X-Served-By \$hostname;" /etc/nginx/sites-available/default
 
-# Restart Nginx to apply changes
+# Restart Nginx
 service nginx restart

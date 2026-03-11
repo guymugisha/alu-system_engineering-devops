@@ -3,9 +3,6 @@
 apt-get update -y
 apt-get install -y nginx
 
-SERVER_HOSTNAME=$(hostname)
+sed -i "s/# server_tokens off;/# server_tokens off;\n\tadd_header X-Served-By $(hostname) always;/" /etc/nginx/nginx.conf
 
-printf "server {\n\tlisten 80 default_server;\n\tlisten [::]:80 default_server;\n\n\troot /var/www/html;\n\tindex index.html index.htm index.nginx-debian.html;\n\n\tserver_name _;\n\n\tadd_header X-Served-By %s always;\n\n\tlocation / {\n\t\ttry_files \$uri \$uri/ =404;\n\t}\n}\n" "$SERVER_HOSTNAME" > /etc/nginx/sites-available/default
-
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-nginx -t && systemctl restart nginx
+service nginx restart

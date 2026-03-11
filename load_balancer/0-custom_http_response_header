@@ -5,21 +5,7 @@ apt-get install -y nginx
 
 SERVER_HOSTNAME=$(hostname)
 
-echo "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
-
-    server_name _;
-
-    add_header X-Served-By \"$SERVER_HOSTNAME\" always;
-
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-}" > /etc/nginx/sites-available/default
+printf "server {\n\tlisten 80 default_server;\n\tlisten [::]:80 default_server;\n\n\troot /var/www/html;\n\tindex index.html index.htm index.nginx-debian.html;\n\n\tserver_name _;\n\n\tadd_header X-Served-By %s always;\n\n\tlocation / {\n\t\ttry_files \$uri \$uri/ =404;\n\t}\n}\n" "$SERVER_HOSTNAME" > /etc/nginx/sites-available/default
 
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 nginx -t && systemctl restart nginx

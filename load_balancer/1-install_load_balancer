@@ -1,11 +1,26 @@
 #!/usr/bin/env bash
 # Installs and configures HAProxy on lb-01 with round robin algorithm
 apt-get update -y
-apt-get install haproxy -y
+apt-get install -y haproxy
 
-echo "ENABLED=1" >> /etc/default/haproxy
+echo "ENABLED=1" > /etc/default/haproxy
 
-cat >> /etc/haproxy/haproxy.cfg << EOF
+cat > /etc/haproxy/haproxy.cfg << 'HAEOF'
+global
+    log /dev/log local0
+    maxconn 2000
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log global
+    mode http
+    option httplog
+    option dontlognull
+    timeout connect 5000
+    timeout client 50000
+    timeout server 50000
 
 frontend http_front
     bind *:80
@@ -15,6 +30,6 @@ backend http_back
     balance roundrobin
     server web-01 3.86.16.111:80 check
     server web-02 13.222.214.21:80 check
-EOF
+HAEOF
 
 service haproxy restart
